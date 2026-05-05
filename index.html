@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-tema="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CodeVault</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0a0a;
+  --bg2:      #111111;
+  --bg3:      #1a1a1a;
+  --border:   #222222;
+  --border2:  #2e2e2e;
+  --txt:      #f0f0f0;
+  --txt2:     #888888;
+  --txt3:     #444444;
+  --accent:   #e8ff47;
+  --accent2:  #b8cc20;
+  --danger:   #ff4444;
+  --radius:   10px;
+  --mono:     'DM Mono', monospace;
+  --sans:     'DM Sans', sans-serif;
+}
+html[data-tema="light"] {
+  --bg:      #f5f5f0;
+  --bg2:     #ffffff;
+  --bg3:     #ebebeb;
+  --border:  #e0e0e0;
+  --border2: #cccccc;
+  --txt:     #111111;
+  --txt2:    #666666;
+  --txt3:    #bbbbbb;
+  --accent:  #1a1a1a;
+  --accent2: #333333;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; font-family:var(--sans); background:var(--bg); color:var(--txt); transition:background .25s,color .25s; }
+
+/* HEADER */
+.header {
+  position:sticky; top:0; z-index:100;
+  background:var(--bg); border-bottom:1px solid var(--border);
+  padding:0 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  height:56px;
+}
+.logo {
+  font-family:var(--mono); font-size:13px; font-weight:500;
+  color:var(--accent); letter-spacing:.05em;
+  display:flex; align-items:center; gap:8px;
+}
+html[data-tema="light"] .logo { color:var(--txt); }
+.logo-dot { width:6px; height:6px; background:var(--accent); border-radius:50%; animation:blink 2s infinite; }
+html[data-tema="light"] .logo-dot { background:var(--txt); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.header-right { display:flex; align-items:center; gap:8px; }
+.btn-icon {
+  width:36px; height:36px; border-radius:8px; border:1px solid var(--border);
+  background:var(--bg2); color:var(--txt2); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:15px;
+  transition:all .15s;
+}
+.btn-icon:hover { border-color:var(--border2); color:var(--txt); }
+.btn-add {
+  height:36px; padding:0 14px; border-radius:8px; border:none;
+  background:var(--accent); color:#111; cursor:pointer;
+  font-family:var(--sans); font-size:12px; font-weight:600;
+  display:flex; align-items:center; gap:6px;
+  transition:all .15s; white-space:nowrap;
+}
+html[data-tema="light"] .btn-add { background:#111; color:#fff; }
+.btn-add:hover { opacity:.85; }
+
+/* BUSCA */
+.search-wrap { padding:16px 20px 8px; }
+.search-input {
+  width:100%; height:40px; padding:0 14px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:8px; color:var(--txt); font-family:var(--sans);
+  font-size:13px; outline:none; transition:border .15s;
+}
+.search-input::placeholder { color:var(--txt3); }
+.search-input:focus { border-color:var(--border2); }
+
+/* CONTADOR */
+.counter { padding:4px 20px 12px; font-size:11px; color:var(--txt2); font-family:var(--mono); }
+
+/* LISTA */
+.lista { padding:0 20px 100px; display:flex; flex-direction:column; gap:8px; }
+
+/* CARD */
+.code-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+  animation:slideUp .2s ease both;
+  transition:border .15s;
+}
+.code-card:hover { border-color:var(--border2); }
+@keyframes slideUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.card-head {
+  padding:12px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  cursor:pointer; gap:10px;
+}
+.card-title {
+  font-size:13px; font-weight:500; color:var(--txt);
+  flex:1; min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.card-meta { font-size:10px; color:var(--txt2); font-family:var(--mono); white-space:nowrap; }
+.card-chevron { color:var(--txt3); font-size:11px; transition:transform .2s; flex-shrink:0; }
+.code-card.open .card-chevron { transform:rotate(180deg); }
+
+.card-body { display:none; border-top:1px solid var(--border); }
+.code-card.open .card-body { display:block; }
+
+.code-block {
+  font-family:var(--mono); font-size:12px; line-height:1.7;
+  color:var(--txt); white-space:pre-wrap; word-break:break-all;
+  padding:14px; max-height:320px; overflow-y:auto;
+  background:var(--bg3);
+}
+.code-block::-webkit-scrollbar { width:4px; }
+.code-block::-webkit-scrollbar-track { background:transparent; }
+.code-block::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+.card-actions {
+  padding:10px 14px; display:flex; gap:6px; justify-content:flex-end;
+  border-top:1px solid var(--border);
+}
+.btn-copy {
+  height:30px; padding:0 12px; border-radius:6px;
+  border:1px solid var(--border); background:transparent;
+  color:var(--txt2); font-family:var(--sans); font-size:11px; font-weight:500;
+  cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:5px;
+}
+.btn-copy:hover { border-color:var(--accent); color:var(--accent); }
+html[data-tema="light"] .btn-copy:hover { border-color:#111; color:#111; }
+.btn-copy.copiado { border-color:var(--accent); color:var(--accent); }
+html[data-tema="light"] .btn-copy.copiado { border-color:#111; color:#111; }
+.btn-del-card {
+  height:30px; padding:0 12px; border-radius:6px;
+  border:1px solid var(--border); background:transparent;
+  color:var(--txt3); font-family:var(--sans); font-size:11px; font-weight:500;
+  cursor:pointer; transition:all .15s;
+}
+.btn-del-card:hover { border-color:var(--danger); color:var(--danger); }
+
+/* EMPTY */
+.empty {
+  text-align:center; padding:80px 20px;
+  font-size:13px; color:var(--txt3); font-family:var(--mono);
+  line-height:2;
+}
+.empty span { display:block; font-size:28px; margin-bottom:10px; }
+
+/* LOADING */
+.loading { text-align:center; padding:60px; color:var(--txt3); font-size:12px; font-family:var(--mono); }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--txt); color:var(--bg);
+  padding:10px 18px; border-radius:8px;
+  font-size:12px; font-weight:600; font-family:var(--mono);
+  transition:transform .25s ease; z-index:9999; white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* MODAL */
+.modal-bg {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.7); z-index:500;
+  align-items:flex-end; justify-content:center;
+  padding:0;
+}
+html[data-tema="light"] .modal-bg { background:rgba(0,0,0,0.4); }
+.modal-bg.show { display:flex; }
+.modal {
+  background:var(--bg2); width:100%; max-width:560px;
+  border-radius:16px 16px 0 0;
+  border:1px solid var(--border); border-bottom:none;
+  padding:20px 20px 40px;
+  animation:slideModal .25s ease;
+}
+@keyframes slideModal { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.modal-handle { width:36px; height:4px; background:var(--border2); border-radius:2px; margin:0 auto 20px; }
+.modal-title { font-size:15px; font-weight:600; margin-bottom:16px; }
+.modal-field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+.modal-label { font-size:10px; font-weight:600; color:var(--txt2); text-transform:uppercase; letter-spacing:.05em; font-family:var(--mono); }
+.modal-input {
+  width:100%; padding:10px 12px; border-radius:8px;
+  border:1px solid var(--border); background:var(--bg3);
+  color:var(--txt); font-family:var(--sans); font-size:13px;
+  outline:none; transition:border .15s;
+}
+.modal-input:focus { border-color:var(--border2); }
+.modal-textarea {
+  width:100%; min-height:160px; padding:10px 12px; border-radius:8px;
+  border:1px solid var(--border); background:var(--bg3);
+  color:var(--txt); font-family:var(--mono); font-size:12px; line-height:1.7;
+  outline:none; resize:vertical; transition:border .15s;
+}
+.modal-textarea:focus { border-color:var(--border2); }
+.modal-btns { display:flex; gap:8px; margin-top:4px; }
+.btn-modal-cancel {
+  flex:1; height:42px; border-radius:8px;
+  border:1px solid var(--border); background:transparent;
+  color:var(--txt2); font-family:var(--sans); font-size:13px; font-weight:500;
+  cursor:pointer; transition:all .15s;
+}
+.btn-modal-cancel:hover { color:var(--txt); border-color:var(--border2); }
+.btn-modal-save {
+  flex:2; height:42px; border-radius:8px; border:none;
+  background:var(--accent); color:#111;
+  font-family:var(--sans); font-size:13px; font-weight:600;
+  cursor:pointer; transition:opacity .15s;
+}
+html[data-tema="light"] .btn-modal-save { background:#111; color:#fff; }
+.btn-modal-save:hover { opacity:.85; }
+.btn-modal-save:disabled { opacity:.4; cursor:not-allowed; }
+
+/* char count */
+.char-info { font-size:10px; color:var(--txt3); font-family:var(--mono); text-align:right; margin-top:4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <span class="logo-dot"></span>
+    codevault
+  </div>
+  <div class="header-right">
+    <button class="btn-icon" id="btn-tema" onclick="alternarTema()" title="Tema">🌙</button>
+    <button class="btn-add" onclick="abrirModal()">
+      <span>+</span> Novo código
+    </button>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <input class="search-input" id="busca" placeholder="Buscar por título..." oninput="renderLista()">
+</div>
+<div class="counter" id="counter"></div>
+
+<div class="lista" id="lista">
+  <div class="loading">carregando...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="fecharModalFora(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-titulo">Novo código</div>
+    <div class="modal-field">
+      <div class="modal-label">Título</div>
+      <input class="modal-input" id="m-titulo" placeholder="Ex: Auth token, SQL query..." maxlength="80">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Código</div>
+      <textarea class="modal-textarea" id="m-codigo" placeholder="Cole ou digite seu código aqui..." oninput="atualizarCharCount()"></textarea>
+      <div class="char-info" id="char-info">0 caracteres</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-modal-save" id="btn-salvar" onclick="salvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, push, remove, onValue, update }
+  from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+// ── CONFIG FIREBASE — troque pelas suas credenciais ──
+const firebaseConfig = {
+  apiKey: "AIzaSyCnAvrLUh4NMVNlMrx08WKeDRM4045htmo",
+  authDomain: "codigos-57ab6.firebaseapp.com",
+  projectId: "codigos-57ab6",
+  storageBucket: "codigos-57ab6.firebasestorage.app",
+  messagingSenderId: "603645490887",
+  appId: "1:603645490887:web:d2197b5399248c44e9f0e2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+const codesRef = ref(db, 'codigos');
+
+// ── TEMA ──
+function aplicarTema(t) {
+  document.documentElement.setAttribute('data-tema', t);
+  localStorage.setItem('cv_tema', t);
+  document.getElementById('btn-tema').textContent = t === 'dark' ? '☀️' : '🌙';
+}
+aplicarTema(localStorage.getItem('cv_tema') || 'dark');
+window.alternarTema = function() {
+  var atual = document.documentElement.getAttribute('data-tema');
+  aplicarTema(atual === 'dark' ? 'light' : 'dark');
+};
+
+// ── DADOS ──
+var _codigos = [];
+onValue(codesRef, function(snap) {
+  var lista = [];
+  snap.forEach(function(child) {
+    lista.push(Object.assign({ _key: child.key }, child.val()));
+  });
+  lista.reverse();
+  _codigos = lista;
+  renderLista();
+});
+
+// ── RENDER ──
+window.renderLista = function() {
+  var busca = (document.getElementById('busca').value || '').toLowerCase();
+  var fil = _codigos.filter(function(c) {
+    return (c.titulo || '').toLowerCase().includes(busca) ||
+           (c.codigo || '').toLowerCase().includes(busca);
+  });
+
+  var counter = document.getElementById('counter');
+  counter.textContent = fil.length + ' código' + (fil.length !== 1 ? 's' : '');
+
+  var lista = document.getElementById('lista');
+  if (!fil.length) {
+    lista.innerHTML = busca
+      ? '<div class="empty"><span>🔍</span>nenhum resultado para "' + busca + '"</div>'
+      : '<div class="empty"><span>📭</span>nenhum código ainda.<br>adicione pelo botão acima.</div>';
+    return;
+  }
+
+  lista.innerHTML = fil.map(function(c) {
+    var preview = (c.codigo || '').slice(0, 80).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var linhas = (c.codigo || '').split('\n').length;
+    var chars  = (c.codigo || '').length;
+    var meta   = linhas + (linhas === 1 ? ' linha' : ' linhas') + ' · ' + chars + ' chars';
+    return '<div class="code-card" id="card-'+c._key+'">' +
+      '<div class="card-head" onclick="toggleCard(\''+c._key+'\')">' +
+        '<span class="card-title">'+escHtml(c.titulo || 'sem título')+'</span>' +
+        '<span class="card-meta">'+meta+'</span>' +
+        '<span class="card-chevron">▾</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="code-block">'+escHtml(c.codigo || '')+'</div>' +
+        '<div class="card-actions">' +
+          '<button class="btn-copy" onclick="copiar(\''+c._key+'\', this)">⎘ Copiar</button>' +
+          '<button class="btn-del-card" onclick="deletar(\''+c._key+'\')">Remover</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+};
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+window.toggleCard = function(key) {
+  var card = document.getElementById('card-'+key);
+  if (card) card.classList.toggle('open');
+};
+
+window.copiar = function(key, btn) {
+  var c = _codigos.find(function(x){ return x._key === key; });
+  if (!c) return;
+  navigator.clipboard.writeText(c.codigo || '').then(function() {
+    btn.textContent = '✓ Copiado!';
+    btn.classList.add('copiado');
+    setTimeout(function() { btn.textContent = '⎘ Copiar'; btn.classList.remove('copiado'); }, 2000);
+  }).catch(function() {
+    // fallback
+    var ta = document.createElement('textarea');
+    ta.value = c.codigo || '';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓ Copiado!';
+    setTimeout(function() { btn.textContent = '⎘ Copiar'; }, 2000);
+  });
+};
+
+window.deletar = function(key) {
+  if (!confirm('Remover este código?')) return;
+  remove(ref(db, 'codigos/'+key))
+    .then(function() { toast('🗑️ Removido'); })
+    .catch(function(e) { toast('Erro: '+e.message); });
+};
+
+// ── MODAL ──
+var _editKey = null;
+
+window.abrirModal = function(key) {
+  _editKey = key || null;
+  document.getElementById('modal-titulo').textContent = key ? 'Editar código' : 'Novo código';
+  if (key) {
+    var c = _codigos.find(function(x){ return x._key === key; });
+    document.getElementById('m-titulo').value = c ? c.titulo : '';
+    document.getElementById('m-codigo').value = c ? c.codigo : '';
+  } else {
+    document.getElementById('m-titulo').value = '';
+    document.getElementById('m-codigo').value = '';
+  }
+  atualizarCharCount();
+  document.getElementById('modal-bg').classList.add('show');
+  setTimeout(function(){ document.getElementById('m-titulo').focus(); }, 200);
+};
+
+window.fecharModal = function() {
+  document.getElementById('modal-bg').classList.remove('show');
+  _editKey = null;
+};
+
+window.fecharModalFora = function(e) {
+  if (e.target === document.getElementById('modal-bg')) fecharModal();
+};
+
+window.atualizarCharCount = function() {
+  var val = document.getElementById('m-codigo').value;
+  document.getElementById('char-info').textContent = val.length.toLocaleString('pt-BR') + ' caracteres';
+};
+
+window.salvar = async function() {
+  var titulo = document.getElementById('m-titulo').value.trim();
+  var codigo = document.getElementById('m-codigo').value;
+  if (!titulo) { document.getElementById('m-titulo').focus(); toast('⚠️ Informe o título'); return; }
+  if (!codigo.trim()) { document.getElementById('m-codigo').focus(); toast('⚠️ Código vazio'); return; }
+
+  var btn = document.getElementById('btn-salvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
+  var dados = { titulo: titulo, codigo: codigo, ts: Date.now() };
+
+  try {
+    if (_editKey) {
+      await update(ref(db, 'codigos/'+_editKey), dados);
+      toast('✓ Atualizado!');
+    } else {
+      await push(codesRef, dados);
+      toast('✓ Salvo!');
+    }
+    fecharModal();
+  } catch(e) {
+    toast('Erro: '+e.message);
+  }
+  btn.disabled = false; btn.textContent = 'Salvar';
+};
+
+// ── TOAST ──
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') fecharModal();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (document.getElementById('modal-bg').classList.contains('show')) salvar();
+  }
+});
+</script>
+</body>
+</html>
